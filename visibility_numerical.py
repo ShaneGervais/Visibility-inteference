@@ -131,7 +131,7 @@ def main():
     polarisation = PolarizationState(a, b)
 
     I_d = np.empty((len(distances), len(distances)))
-    #I = np.empty(len(time))
+    v = np.empty(len(distances))
     for i in range(len(time)):
         for j in range(len(distances)):
             preselected_state = couple_initial_state(polarisation, pointer.Function, time)
@@ -141,6 +141,11 @@ def main():
             postselected_state = apply_postselection(intermediate_state, postselected_angle, 0, 0, time)
 
             I = intensity_HV_Profile(postselected_state, time)
+            I_max = np.max(I)
+            I_min = np.min(I)
+
+            vi = (I_max - I_min)/(I_max + I_min)
+            v[i] = vi
             I_d[i][j] = I[j]
 
     X, Y = np.meshgrid(time, distances)
@@ -155,11 +160,10 @@ def main():
     ax.set_xlabel('time')
     ax.set_ylabel('distance')
     ax.set_zlabel('Intensity')
-    ax.set_title('3D Plot')
 
     # Display the plot
     plt.show()
-
+   
     preselected_state = couple_initial_state(polarisation, pointer.Function, time)
 
     intermediate_state = mach_zedner_interference(preselected_state, time, 0.003, wavelength, 'H')
@@ -172,6 +176,14 @@ def main():
 
     plt.figure()
     plt.plot(time, g_1)
+    plt.xlabel('time')
+    plt.ylabel('g_1')
+    plt.show()
+   
+    plt.figure()
+    plt.plot(distances, v)
+    plt.xlabel('distance')
+    plt.ylabel('contrast')
     plt.show()
 
     I_max = np.max(I)
